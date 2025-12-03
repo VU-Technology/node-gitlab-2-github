@@ -1035,8 +1035,16 @@ export class GithubHelper {
         return Promise.resolve(response);
       } catch (err) {
         if (err.status === 422) {
+          // Log the actual error details to help diagnose the issue
           console.error(
-            `Pull request #${mergeRequest.iid} - attempt to create has failed, assume '${mergeRequest.source_branch}' has already been merged => cannot migrate pull request, creating an issue instead.`
+            `Pull request #${mergeRequest.iid} - GitHub returned 422 error when creating PR from '${mergeRequest.source_branch}' to '${mergeRequest.target_branch}'`
+          );
+          console.error(`GitHub error message: ${err.message}`);
+          if (err.errors && err.errors.length > 0) {
+            console.error(`GitHub error details: ${JSON.stringify(err.errors)}`);
+          }
+          console.error(
+            `Cannot create pull request - creating an issue instead to preserve discussion history.`
           );
           // fall through to next section
         } else {
